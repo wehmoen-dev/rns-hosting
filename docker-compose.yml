@@ -1,0 +1,16 @@
+name: rnshosting
+
+services:
+  bot:
+    image: rnshosting
+    build:
+      context: .
+    pull_policy: build
+    ports:
+      - "127.0.0.1:5555:5555"
+    environment:
+      - PORT=5555
+      - API_KEY=${API_KEY}
+    deploy:
+      replicas: 1
+    restart: unless-stopped
