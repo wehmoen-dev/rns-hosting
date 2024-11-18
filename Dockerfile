@@ -13,4 +13,5 @@ RUN  upx --brute /server
 FROM scratch
 COPY --from=certs /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=upx /server /server
+EXPOSE 5555
 CMD ["/server"]
