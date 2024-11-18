@@ -144,7 +144,7 @@ func loadContent(hash string) (*string, error) {
 	defer cancel()
 
 	var result string
-	resp, err := r.R().SetContext(ctxTimeout).Get("https://warlord.dev/ipfs/" + hash)
+	resp, err := r.R().SetContext(ctxTimeout).Get(fmt.Sprintf("%s/ipfs/%s", os.Getenv("IPFS_GATEWAY"), hash))
 
 	if err != nil {
 		return nil, err
