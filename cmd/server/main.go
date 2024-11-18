@@ -40,6 +40,10 @@ func main() {
 		log.Fatalf("Failed to connect to the Ethereum client: %v", err)
 	}
 
+	e.GET("/health", func(c echo.Context) error {
+		return c.NoContent(http.StatusOK)
+	})
+
 	e.GET("/:address", func(c echo.Context) error {
 		address := c.Param("address")
 
