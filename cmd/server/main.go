@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"github.com/ethereum/go-ethereum"
@@ -67,6 +68,26 @@ func main() {
 
 		return c.HTML(http.StatusOK, *content)
 
+	})
+
+	e.GET("/hash/node/:address", func(c echo.Context) error {
+		address := c.Param("address")
+		hash, err := ens.NameHash(address)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, "Invalid address")
+		}
+
+		return c.JSON(http.StatusOK, map[string]string{"hash": hex.EncodeToString(hash[:])})
+	})
+
+	e.GET("/hash/ipfs/:address", func(c echo.Context) error {
+		address := c.Param("address")
+		hash, err := multihash.FromB58String(address)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, "Invalid hash")
+		}
+
+		return c.JSON(http.StatusOK, map[string]string{"hash": hash.HexString()})
 	})
 
 	e.Logger.Fatal(e.Start(fmt.Sprintf("0.0.0.0:%s", os.Getenv("PORT"))))
