@@ -59,14 +59,30 @@ func main() {
 			return echo.NewHTTPError(http.StatusInternalServerError, "Failed to get content hash")
 		}
 
-		content, err := loadContent(*hash)
+		content, contentType, err := loadContent(*hash)
 
 		if err != nil {
 			log.Printf("Failed to load content: %+v", err)
 			return echo.NewHTTPError(http.StatusInternalServerError, "Failed to load content")
 		}
 
-		return c.HTML(http.StatusOK, *content)
+		if contentType == nil {
+			return c.Blob(http.StatusOK, "application/octet-stream", []byte(*content))
+		}
+
+		if *contentType == "text/html" {
+			return c.HTML(http.StatusOK, *content)
+		}
+
+		if *contentType == "text/plain" {
+			return c.String(http.StatusOK, *content)
+		}
+
+		if strings.HasPrefix(*contentType, "image/") {
+			return c.Blob(http.StatusOK, *contentType, []byte(*content))
+		}
+
+		return c.Blob(http.StatusOK, "application/octet-stream", []byte(*content))
 
 	})
 
@@ -136,7 +152,7 @@ func getContentHash(client *ethclient.Client, name string) (*string, error) {
 	return &hash, nil
 }
 
-func loadContent(hash string) (*string, error) {
+func loadContent(hash string) (*string, *string, error) {
 
 	r := resty.New()
 	ctx := context.Background()
@@ -147,17 +163,19 @@ func loadContent(hash string) (*string, error) {
 	resp, err := r.R().SetContext(ctxTimeout).Get(fmt.Sprintf("%s/ipfs/%s", os.Getenv("IPFS_GATEWAY"), hash))
 
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	if resp.IsError() {
 		if resp.Error() != nil {
-			return nil, resp.Error().(error)
+			return nil, nil, resp.Error().(error)
 		}
-		return nil, errors.New(resp.Status())
+		return nil, nil, errors.New(resp.Status())
 	}
 
 	result = resp.String()
 
-	return &result, nil
+	contentType := resp.RawResponse.Header.Get("Content-Type")
+
+	return &result, &contentType, nil
 }
