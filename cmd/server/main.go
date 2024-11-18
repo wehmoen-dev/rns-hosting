@@ -69,7 +69,7 @@ func main() {
 
 	})
 
-	e.Logger.Fatal(e.Start(fmt.Sprintf("127.0.0.1:%s", os.Getenv("PORT"))))
+	e.Logger.Fatal(e.Start(fmt.Sprintf("0.0.0.0:%s", os.Getenv("PORT"))))
 
 }
 
