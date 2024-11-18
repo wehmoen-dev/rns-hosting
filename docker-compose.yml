@@ -11,6 +11,7 @@ services:
     environment:
       - PORT=5555
       - API_KEY=${API_KEY}
+      - IPFS_GATEWAY=${IPFS_GATEWAY}
     deploy:
       replicas: 1
     restart: unless-stopped
